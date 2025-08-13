@@ -40,7 +40,7 @@ public class CalculateSales {
 		if(!readFile(args[0], FILE_NAME_BRANCH_LST, branchNames, branchSales)) {
 			return;
 		}
-
+		
 		// ※ここから集計処理を作成してください。(処理内容2-1、2-2)
 		//引数でもらったパスを変数に入れた
 		String pass = args[0];
@@ -52,33 +52,41 @@ public class CalculateSales {
 		for(int i = 0 ; i < files.length ; i++) {
 			String fileName = files[i].getName();
 			//売上ファイルを選定してリストに格納する
-			if(fileName.matches("^\\d{8}.rcd$")) {
+			if(fileName.matches("^\\d{8}\\.rcd$")) {
 				rcdFiles.add(files[i]);
 			}
 		}
-		//さっき格納したリストから一つずつファイルを取り出し読み取る
+		//売り上げのファイルのみが入ったリストから一つずつファイルを取り出し読み取る
 		for (int i = 0; i < rcdFiles.size(); i++) {
 			FileReader fr  = null;
 	    	BufferedReader br = null;
+	    	ArrayList<String> FileElements = new ArrayList<>();
+	    	String branchCode = null;
+	    	String money = null;
+	    	Long trueMoney = null;
 			try {
 		    	//ファイルの読み込み準備
 		    	fr = new FileReader(rcdFiles.get(i));
 		    	br = new BufferedReader(fr);
+		    	
+		    	//一行ずつ読み取り、それをFileElements配列に入れていく
 				while(true){
-					//支店番号と売り上げを売り上げファイルの個数だけ読み取る
-		    		String branchCode = br.readLine();
-		    		if(branchCode == null) {
+					String element = br.readLine();
+					if( element == null) {
 		    			break;
 		    		}
-		    		String money = br.readLine();
-		    		
-
-		    		//売り上げをLong型に変換してから格納
-		    		Long trueMoney = Long.parseLong(money);
-		    		branchSales.put(branchCode, trueMoney);
-		    	}
-		    	
-
+					FileElements.add(element);
+				}
+				//配列から支店名変数branchCodeと売り上げ変数moneyに入れていく（偶数番目か奇数番目かで）
+				for(i = 0 ; i < FileElements.size() ; i++) {
+					if((i + 2) % 2 == 0) {
+					branchCode = FileElements.get(i);
+					}else {money = FileElements.get(i);
+						trueMoney = Long.parseLong(money);//moneyはLong型にしておく
+					}
+				}
+		    	//branchSalesのMapに変数を入れる
+		    	branchSales.put(branchCode, trueMoney);
 		    }catch(IOException e) {
 					System.out.println(UNKNOWN_ERROR);
 		    }finally {
@@ -117,6 +125,11 @@ public class CalculateSales {
 
 		try {
 			File file = new File(path, fileName);
+			if(!file.exists()) {
+				System.out.println(FILE_NOT_EXIST);
+				return false;
+			}
+			
 			FileReader fr = new FileReader(file);
 			br = new BufferedReader(fr);
 
