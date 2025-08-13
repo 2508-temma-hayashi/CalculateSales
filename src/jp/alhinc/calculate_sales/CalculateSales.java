@@ -1,5 +1,4 @@
 package jp.alhinc.calculate_sales;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -47,47 +46,53 @@ public class CalculateSales {
 		String pass = args[0];
 		//引数でもらったパスの中のファイルを配列にまとめた
 		File[] files = new File(pass).listFiles();
-		if(files == null) {
-			System.out.println(UNKNOWN_ERROR);
-		    return;
-		}
 		//選定された売上ファイルのみのリストのオブジェクトを作った
 		List<File> rcdFiles = new ArrayList<>();
 		//filesの中から売上ファイルを選定する（ファイル名の表記で）
 		for(int i = 0 ; i < files.length ; i++) {
 			String fileName = files[i].getName();
 			//売上ファイルを選定してリストに格納する
-			if(fileName.matches(".*\\.rcd$")) {
+			if(fileName.matches("^\\d{8}.rcd$")) {
 				rcdFiles.add(files[i]);
 			}
 		}
 		//さっき格納したリストから一つずつファイルを取り出し読み取る
 		for (int i = 0; i < rcdFiles.size(); i++) {
-		    try {
+			FileReader fr  = null;
+	    	BufferedReader br = null;
+			try {
 		    	//ファイルの読み込み準備
-		    	FileReader fr = new FileReader(rcdFiles.get(i));
-		    	BufferedReader br = new BufferedReader(fr);
+		    	fr = new FileReader(rcdFiles.get(i));
+		    	br = new BufferedReader(fr);
+				while(true){
+					//支店番号と売り上げを売り上げファイルの個数だけ読み取る
+		    		String branchCode = br.readLine();
+		    		if(branchCode == null) {
+		    			break;
+		    		}
+		    		String money = br.readLine();
+		    		
 
-		    	//支店番号と売り上げを読み取る
-		    	String branchCode = br.readLine();
-		    	String money = br.readLine();
-
-		    	br.close();
-
-		    	//売り上げをLong型に変換
-		    	Long truemoney = Long.parseLong(money);
-
-		    	if(branchSales.containsKey(branchCode)) {
-		    		//支店コードがもともと存在してたら売り上げの合計を計算
-		    		Long salemount = branchSales.get(branchCode) + truemoney;
-		    		branchSales.put(branchCode, salemount);
-		    	}else {
-		            branchSales.put(branchCode, truemoney);
+		    		//売り上げをLong型に変換してから格納
+		    		Long trueMoney = Long.parseLong(money);
+		    		branchSales.put(branchCode, trueMoney);
 		    	}
+		    	
 
 		    }catch(IOException e) {
 					System.out.println(UNKNOWN_ERROR);
-		    }
+		    }finally {
+				// ファイルを開いている場合
+				if(br != null) {
+					try {
+						// ファイルを閉じる
+						br.close();
+					} catch(IOException e) {
+						System.out.println(UNKNOWN_ERROR);
+						return;
+					}
+				}
+			}
 		}
 		
 		
@@ -120,10 +125,10 @@ public class CalculateSales {
 			while((line = br.readLine()) != null) {
 				// ※ここの読み込み処理を変更してください。(処理内容1-2)
 				String[] items = line.split(",");
-				String branchnumber = items[0];
-				String branchname = items[1];
-				branchNames.put(branchnumber,branchname );
-				branchSales.put(branchnumber, 0L);
+				String branchNumber = items[0];
+				String branchName = items[1];
+				branchNames.put(branchNumber, branchName );
+				branchSales.put(branchNumber, 0L);
 			}
 
 		} catch(IOException e) {
@@ -170,18 +175,14 @@ public class CalculateSales {
 				Long sales = branchSales.get(key);
 				
 				//それをファイルの中に書く
-				bw.write( key + "," + name + "," + sales);
+				bw.write(key + "," + name + "," + sales);
 				//改行して次の準備
 				bw.newLine();
 			}
-		}
-			
-		catch(IOException e){
+		}catch(IOException e){
 			System.out.println(UNKNOWN_ERROR);
 			return false;
-		}
-		
-		finally {
+		}finally {
 			// ファイルを開いている場合
 			if(bw != null) {
 				try {
