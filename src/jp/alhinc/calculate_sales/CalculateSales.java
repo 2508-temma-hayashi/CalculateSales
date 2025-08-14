@@ -38,7 +38,11 @@ public class CalculateSales {
 	private static final String NUMBER_OF_INVALID = "合計金額が10桁を超えました";
 	private static final String UNKNOWN_ERROR = "予期せぬエラーが発生しました";
 	private static final String FILE_NOT_EXIST = "定義ファイルが存在しません";
-	private static final String FILE_INVALID_FORMAT = "定義ファイルのフォーマットが不正です";
+	
+	//メッセージ用
+	private static final String product = "支店定義";
+	private static final String subproduct = "商品定義";
+	
 	/**
 	 * メインメソッド
 	 *
@@ -60,12 +64,12 @@ public class CalculateSales {
 		//商品コードと売上金額
 		Map<String,Long>  commoditySales= new HashMap<>();
 		// 支店定義ファイル読み込み処理
-		if(!readFile(args[0], FILE_NAME_BRANCH_LST, branchNames, branchSales, REGULAR_NUMBER_EXPRESSION, "支店", FILE_INVALID_FORMAT, "支店" ,  FILE_NOT_EXIST)) {
+		if(!readFile(args[0], FILE_NAME_BRANCH_LST, branchNames, branchSales, REGULAR_NUMBER_EXPRESSION, product, FORMAT_IS_INVALID, FILE_NOT_EXIST)) {
 			return;
 		}
 		
 		// 支店定義ファイル読み込み処理
-		if(!readFile(args[0], FILE_NAME_COMMODITY_LST, commodityCodes, commoditySales, REGULAR_CHARACTER_EXPRESSION, "商品", FILE_INVALID_FORMAT, "商品" , FILE_NOT_EXIST)) {
+		if(!readFile(args[0], FILE_NAME_COMMODITY_LST, commodityCodes, commoditySales, REGULAR_CHARACTER_EXPRESSION, subproduct, FORMAT_IS_INVALID, FILE_NOT_EXIST)) {
 			return;
 		}
 
@@ -198,13 +202,13 @@ public class CalculateSales {
 	 * @param 支店コードと売上金額を保持するMap
 	 * @return 読み込み可否
 	 */
-	private static boolean readFile(String path, String fileName, Map<String, String> branchNames, Map<String, Long> branchSales, String regularExpression, String product, String formatError, String subProduct, String fileError) {
+	private static boolean readFile(String path, String fileName, Map<String, String> branchNames, Map<String, Long> branchSales, String regularExpression, String problem, String formatError, String fileError) {
 		BufferedReader br = null;
 
 		try {
 			File file = new File(path, fileName);
 			if(!file.exists()) {
-				System.out.println(subProduct + fileError);
+				System.out.println(problem + fileError);
 				return false;
 			}
 
@@ -221,7 +225,7 @@ public class CalculateSales {
 
 				//★「例外処理」支店定義ファイルの中身のフォーマット確認
 				if((items.length != 2) || (!branchFirst.matches(regularExpression))) {
-					System.out.println(product + formatError);
+					System.out.println(problem + formatError);
 					return false;
 				}
 				branchNames.put(branchFirst, branchSecond );
