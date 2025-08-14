@@ -59,21 +59,16 @@ public class CalculateSales {
 		//選定された売上ファイルのみのリストのオブジェクトを作った
 		List<File> rcdFiles = new ArrayList<>();
 		//filesの中から売上ファイルを選定する（ファイル名の表記で）
-		for(int i = 0 ; i < files.length ; i++) {
+		for(int i = 0; i < files.length; i++) {
 			String fileName = files[i].getName();
 			//売上ファイルを選定してリストに格納する
 			if(files[i].isFile() && fileName.matches("^\\d{8}\\.rcd$")){
 				rcdFiles.add(files[i]);
-				Collections.sort(rcdFiles);
-			}
-			//ファイルでかつ.rcdをもつファイルなのか。
-			if(!files[i].isFile() && fileName.matches("^\\d{8}\\.rcd$")) {
-				System.out.println(UNKNOWN_ERROR);
-				return;
 			}
 		}
+		Collections.sort(rcdFiles);
 		//★「例外処理」もしも追加したものが連番ではなかったらエラーを吐く
-		for(int i = 0; i < rcdFiles.size() -1; i++) {
+		for(int i = 0; i < rcdFiles.size() - 1; i++){
 			int former = Integer.parseInt(rcdFiles.get(i).getName().substring(0, 8));
 			int latter = Integer.parseInt(rcdFiles.get(i + 1).getName().substring(0, 8));
 
@@ -90,7 +85,7 @@ public class CalculateSales {
 	    	ArrayList<String> fileElements = new ArrayList<>();
 	    	String branchCode = null;
 	    	String money = null;
-	    	Long fileSale = 0L ;
+	    	Long fileSale = 0L;
 			try {
 		    	//ファイルの読み込み準備
 		    	fr = new FileReader(rcdFiles.get(i));
@@ -104,14 +99,14 @@ public class CalculateSales {
 				}
 		    	//★「例外処理」2行でない場合エラーを吐く
 				if(fileElements.size() != 2) {
-					System.out.println(rcdFiles.get(i) + FORMAT_IS_INVALID);
+					System.out.println(rcdFiles.get(i).getName() + FORMAT_IS_INVALID);
 					return;
 				}
 				//リストから支店名変数branchCodeと売り上げ変数moneyに入れていく
 				branchCode = fileElements.get(0);
 				//★「例外処理」支店コードが支店名ファイルに入っていなければエラーを吐く
 		    	if(!branchNames.containsKey(branchCode)) {
-		    		System.out.println(rcdFiles.get(i) + BRANCH_CODE_IS_INVALID);
+		    		System.out.println(rcdFiles.get(i).getName() + BRANCH_CODE_IS_INVALID);
 		    		return;
 		    	}
 				money = fileElements.get(1);
@@ -187,6 +182,7 @@ public class CalculateSales {
 				String[] items = line.split(",");
 				String branchNumber = items[0];
 				String branchName = items[1];
+
 				//★「例外処理」支店定義ファイルの中身のフォーマット確認
 				if((items.length != 2) || (!branchNumber.matches("^\\d{3}$"))) {
 					System.out.println(FILE_INVALID_FORMAT);
@@ -195,6 +191,8 @@ public class CalculateSales {
 				branchNames.put(branchNumber, branchName );
 				branchSales.put(branchNumber, 0L);
 			}
+
+
 
 		} catch(IOException e) {
 			System.out.println(UNKNOWN_ERROR);
