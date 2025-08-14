@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,9 +62,10 @@ public class CalculateSales {
 		for(int i = 0 ; i < files.length ; i++) {
 			String fileName = files[i].getName();
 			//売上ファイルを選定してリストに格納する
-			if(fileName.matches("^\\d{8}\\.rcd$")) {
+			if(files[i].isFile() && fileName.matches("^\\d{8}\\.rcd$")){
 				rcdFiles.add(files[i]);
-					}
+				Collections.sort(rcdFiles);
+			}
 			//ファイルでかつ.rcdをもつファイルなのか。
 			if(!files[i].isFile() && fileName.matches("^\\d{8}\\.rcd$")) {
 				System.out.println(UNKNOWN_ERROR);
@@ -72,8 +74,8 @@ public class CalculateSales {
 		}
 		//★「例外処理」もしも追加したものが連番ではなかったらエラーを吐く
 		for(int i = 0; i < rcdFiles.size() -1; i++) {
-			int former = Integer.parseInt(rcdFiles.get(i).getName().substring(0,8));
-			int latter = Integer.parseInt(rcdFiles.get(i + 1).getName().substring(0,8));
+			int former = Integer.parseInt(rcdFiles.get(i).getName().substring(0, 8));
+			int latter = Integer.parseInt(rcdFiles.get(i + 1).getName().substring(0, 8));
 
 			if(latter - former != 1) {
 				System.out.println(FILE_NOT_SERTAL_NUMBERS);
@@ -85,7 +87,7 @@ public class CalculateSales {
 		for (int i = 0; i < rcdFiles.size(); i++) {
 			FileReader fr  = null;
 	    	BufferedReader br = null;
-	    	ArrayList<String> FileElements = new ArrayList<>();
+	    	ArrayList<String> fileElements = new ArrayList<>();
 	    	String branchCode = null;
 	    	String money = null;
 	    	Long fileSale = 0L ;
@@ -98,21 +100,21 @@ public class CalculateSales {
 		    	String line;
 		    	while((line = br.readLine()) != null){
 					//追加する。
-					FileElements.add(line);
-					//3個以上の要素を持っていた場合エラーを吐く
-					if(FileElements.size() >= 3) {
-						System.out.println("<" + rcdFiles.get(i)+ ">" + FORMAT_IS_INVALID);
-						return;
-					}
+					fileElements.add(line);
+				}
+		    	//★「例外処理」2行でない場合エラーを吐く
+				if(fileElements.size() != 2) {
+					System.out.println(rcdFiles.get(i) + FORMAT_IS_INVALID);
+					return;
 				}
 				//リストから支店名変数branchCodeと売り上げ変数moneyに入れていく
-				branchCode = FileElements.get(0);
+				branchCode = fileElements.get(0);
 				//★「例外処理」支店コードが支店名ファイルに入っていなければエラーを吐く
 		    	if(!branchNames.containsKey(branchCode)) {
-		    		System.out.println("<" + rcdFiles.get(i)+ ">" + BRANCH_CODE_IS_INVALID);
+		    		System.out.println(rcdFiles.get(i) + BRANCH_CODE_IS_INVALID);
 		    		return;
 		    	}
-				money = FileElements.get(1);
+				money = fileElements.get(1);
 				//★「例外処理」money（売り上げ）が数字であるか。
 				if (!money.matches("^[0-9]+$")) {
 					System.out.println(UNKNOWN_ERROR);
@@ -122,20 +124,18 @@ public class CalculateSales {
 				//moneyはLong型にしてもともとのもの入ってるものと加算
 				fileSale = Long.parseLong(money);
 
-
-
+		    	Long saleAmount = branchSales.get(branchCode) + fileSale;
 		    	//branchSalesの売り上げが11ケタ以上ならエラーを吐く
-		    	Long saleAmount = branchSales.get(branchCode)+ fileSale;
-		    	//★「例外処理」branchSalesのMapに支店名と売り上げの変数を入れる
-		    	branchSales.put(branchCode,saleAmount);
 		    	if(saleAmount >= 10000000000L) {
 		    		System.out.println(NUMBER_OF_INVALID);
 		    		return;
 		    	}
+		    	//branchSalesのMapに支店名と売り上げの変数を入れる
+		    	branchSales.put(branchCode, saleAmount);
 
-
-		    }catch(IOException e) {
+			}catch(IOException e) {
 					System.out.println(UNKNOWN_ERROR);
+					return;
 		    }finally {
 				// ファイルを開いている場合
 				if(br != null) {
@@ -263,4 +263,8 @@ public class CalculateSales {
 
 	}
 
+
+
 }
+
+
