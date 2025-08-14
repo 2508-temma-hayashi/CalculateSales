@@ -20,6 +20,10 @@ public class CalculateSales {
 	private static final String FILE_NAME_BRANCH_OUT = "branch.out";
 
 	// エラーメッセージ
+	private static final String FILE_NOT_SERTAL_NUMBERS = "売上ファイル名が連番になっていません";
+	private static final String FORMAT_IS_INVALID = "のフォーマットが不正です";
+	private static final String BRANCH_CODE_IS_INVALID = "の支店コードが不正です";
+	private static final String NUMBER_OF_INVALID = "合計金額が10桁を超えました";
 	private static final String UNKNOWN_ERROR = "予期せぬエラーが発生しました";
 	private static final String FILE_NOT_EXIST = "支店定義ファイルが存在しません";
 	private static final String FILE_INVALID_FORMAT = "支店定義ファイルのフォーマットが不正です";
@@ -72,7 +76,7 @@ public class CalculateSales {
 			int latter = Integer.parseInt(rcdFiles.get(i + 1).getName().substring(0,8));
 
 			if(latter - former != 1) {
-				System.out.println("売上ファイル名が連番になっていません");
+				System.out.println(FILE_NOT_SERTAL_NUMBERS);
 				return;
 			}
 		}
@@ -97,7 +101,7 @@ public class CalculateSales {
 					FileElements.add(line);
 					//3個以上の要素を持っていた場合エラーを吐く
 					if(FileElements.size() >= 3) {
-						System.out.println("<" + rcdFiles.get(i)+ ">" + "のフォーマットが不正です");
+						System.out.println("<" + rcdFiles.get(i)+ ">" + FORMAT_IS_INVALID);
 						return;
 					}
 				}
@@ -105,7 +109,7 @@ public class CalculateSales {
 				branchCode = FileElements.get(0);
 				//★「例外処理」支店コードが支店名ファイルに入っていなければエラーを吐く
 		    	if(!branchNames.containsKey(branchCode)) {
-		    		System.out.println("<" + rcdFiles.get(i)+ ">" + "の支店コードが不正です");
+		    		System.out.println("<" + rcdFiles.get(i)+ ">" + BRANCH_CODE_IS_INVALID);
 		    		return;
 		    	}
 				money = FileElements.get(1);
@@ -125,9 +129,10 @@ public class CalculateSales {
 		    	//★「例外処理」branchSalesのMapに支店名と売り上げの変数を入れる
 		    	branchSales.put(branchCode,saleAmount);
 		    	if(saleAmount >= 10000000000L) {
-		    		System.out.println("合計金額が10桁を超えました");
+		    		System.out.println(NUMBER_OF_INVALID);
 		    		return;
 		    	}
+
 
 		    }catch(IOException e) {
 					System.out.println(UNKNOWN_ERROR);
